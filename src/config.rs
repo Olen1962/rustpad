@@ -67,14 +67,35 @@ pub struct Textos {
     pub prefs_titulo: &'static str,
     pub prefs_idioma: &'static str,
     pub prefs_tema: &'static str,
+    pub tema_claro: &'static str,
+    pub tema_escuro: &'static str,
+    pub tema_sistema: &'static str,
+    pub prefs_icones: &'static str,
+    pub prefs_pasta_icones: &'static str,
+    pub prefs_detetar_xfce: &'static str,
+    pub prefs_decoracoes_sistema: &'static str,
     pub prefs_tipografia: &'static str,
+    pub prefs_familia: &'static str,
+    pub prefs_tam_editor: &'static str,
+    pub prefs_tam_menu: &'static str,
     pub prefs_ajustes: &'static str,
     pub prefs_largura_tab: &'static str,
     pub prefs_espacos_tab: &'static str,
     pub prefs_auto_indentar: &'static str,
     pub prefs_destacar_linha: &'static str,
     pub prefs_guardar_auto: &'static str,
-    pub guardar_defs: &'static str,
+    pub aba_aparencia: &'static str,
+    pub aba_editor: &'static str,
+    pub aba_sistema: &'static str,
+    pub maiusculas_exatas: &'static str,
+    pub dica_procurar: &'static str,
+    pub dica_substituir: &'static str,
+    pub dialogo_abrir_titulo: &'static str,
+    pub dialogo_guardar_titulo: &'static str,
+    pub dialogo_erro_titulo: &'static str,
+    pub dialogo_caminho: &'static str,
+    pub confirmar: &'static str,
+    pub cancelar: &'static str,
 }
 
 impl Textos {
@@ -107,16 +128,37 @@ impl Textos {
                 zoom_mais: "Aumentar letra",
                 zoom_menos: "Diminuir letra",
                 prefs_titulo: "Preferências do RustPad",
-                prefs_idioma: "Idioma (i18n)",
-                prefs_tema: "Tema GTK4 (src/lib.rs)",
+                prefs_idioma: "Idioma",
+                prefs_tema: "Tema",
+                tema_claro: "Claro",
+                tema_escuro: "Escuro",
+                tema_sistema: "Tema do Sistema",
+                prefs_icones: "Ícones e Sistema de Janelas",
+                prefs_pasta_icones: "Pasta de ícones",
+                prefs_detetar_xfce: "Detetar XFCE",
+                prefs_decoracoes_sistema: "Usar barra de título do sistema (XFCE)",
                 prefs_tipografia: "Tipografia",
+                prefs_familia: "Família",
+                prefs_tam_editor: "Tamanho do editor",
+                prefs_tam_menu: "Tamanho dos menus",
                 prefs_ajustes: "Ajustes do Editor",
                 prefs_largura_tab: "Largura do Tab",
                 prefs_espacos_tab: "Inserir espaços em vez de Tab",
                 prefs_auto_indentar: "Auto-indentação",
                 prefs_destacar_linha: "Destacar linha atual",
                 prefs_guardar_auto: "Guardar automaticamente",
-                guardar_defs: "Guardar definições",
+                aba_aparencia: "Aparência",
+                aba_editor: "Editor",
+                aba_sistema: "Sistema",
+                maiusculas_exatas: "Distinguir maiúsculas",
+                dica_procurar: "Texto a procurar…",
+                dica_substituir: "Substituir por…",
+                dialogo_abrir_titulo: "Abrir ficheiro",
+                dialogo_guardar_titulo: "Guardar ficheiro como",
+                dialogo_erro_titulo: "Erro de ficheiro",
+                dialogo_caminho: "Caminho do ficheiro",
+                confirmar: "Confirmar",
+                cancelar: "Cancelar",
             },
             Idioma::En => Self {
                 sem_nome: "Untitled",
@@ -145,16 +187,37 @@ impl Textos {
                 zoom_mais: "Zoom in",
                 zoom_menos: "Zoom out",
                 prefs_titulo: "RustPad Preferences",
-                prefs_idioma: "Language (i18n)",
-                prefs_tema: "GTK4 Theme (src/lib.rs)",
+                prefs_idioma: "Language",
+                prefs_tema: "Theme",
+                tema_claro: "Light",
+                tema_escuro: "Dark",
+                tema_sistema: "System Theme",
+                prefs_icones: "Icons & Window Manager",
+                prefs_pasta_icones: "Icons folder",
+                prefs_detetar_xfce: "Detect XFCE",
+                prefs_decoracoes_sistema: "Use system window titlebar (XFCE)",
                 prefs_tipografia: "Typography",
+                prefs_familia: "Font family",
+                prefs_tam_editor: "Editor font size",
+                prefs_tam_menu: "Menu font size",
                 prefs_ajustes: "Editor Settings",
                 prefs_largura_tab: "Tab width",
                 prefs_espacos_tab: "Insert spaces instead of Tab",
                 prefs_auto_indentar: "Auto-indent",
                 prefs_destacar_linha: "Highlight current line",
                 prefs_guardar_auto: "Auto-save",
-                guardar_defs: "Save settings",
+                aba_aparencia: "Appearance",
+                aba_editor: "Editor",
+                aba_sistema: "System",
+                maiusculas_exatas: "Match case",
+                dica_procurar: "Text to find…",
+                dica_substituir: "Replace with…",
+                dialogo_abrir_titulo: "Open file",
+                dialogo_guardar_titulo: "Save file as",
+                dialogo_erro_titulo: "File error",
+                dialogo_caminho: "File path",
+                confirmar: "Confirm",
+                cancelar: "Cancel",
             },
             Idioma::Es => Self {
                 sem_nome: "Sin título",
@@ -183,16 +246,37 @@ impl Textos {
                 zoom_mais: "Aumentar fuente",
                 zoom_menos: "Reducir fuente",
                 prefs_titulo: "Preferencias de RustPad",
-                prefs_idioma: "Idioma (i18n)",
-                prefs_tema: "Tema GTK4 (src/lib.rs)",
+                prefs_idioma: "Idioma",
+                prefs_tema: "Tema",
+                tema_claro: "Claro",
+                tema_escuro: "Oscuro",
+                tema_sistema: "Tema del Sistema",
+                prefs_icones: "Iconos y Gestor de Ventanas",
+                prefs_pasta_icones: "Carpeta de iconos",
+                prefs_detetar_xfce: "Detectar XFCE",
+                prefs_decoracoes_sistema: "Usar barra de título del sistema (XFCE)",
                 prefs_tipografia: "Tipografía",
+                prefs_familia: "Familia",
+                prefs_tam_editor: "Tamaño del editor",
+                prefs_tam_menu: "Tamaño de menús",
                 prefs_ajustes: "Ajustes del Editor",
                 prefs_largura_tab: "Ancho de Tab",
                 prefs_espacos_tab: "Insertar espacios en Tab",
                 prefs_auto_indentar: "Auto-indentación",
                 prefs_destacar_linha: "Resaltar línea actual",
                 prefs_guardar_auto: "Guardado automático",
-                guardar_defs: "Guardar ajustes",
+                aba_aparencia: "Apariencia",
+                aba_editor: "Editor",
+                aba_sistema: "Sistema",
+                maiusculas_exatas: "Coincidir mayúsculas",
+                dica_procurar: "Texto a buscar…",
+                dica_substituir: "Reemplazar con…",
+                dialogo_abrir_titulo: "Abrir archivo",
+                dialogo_guardar_titulo: "Guardar archivo como",
+                dialogo_erro_titulo: "Error de archivo",
+                dialogo_caminho: "Ruta del archivo",
+                confirmar: "Confirmar",
+                cancelar: "Cancelar",
             },
         }
     }
@@ -205,6 +289,8 @@ pub struct Config {
     pub fonte_familia: String,
     pub tamanho_fonte: f32,
     pub tamanho_menu: f32,
+    pub pasta_icones: String,
+    pub decoracoes_sistema: bool,
     pub quebra_linha: bool,
     pub numeros_linha: bool,
     pub barra_estado: bool,
@@ -218,11 +304,13 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            modo_tema: ModoTema::Claro,
+            modo_tema: ModoTema::Sistema,
             idioma: Idioma::Pt,
             fonte_familia: String::from("Monospace"),
-            tamanho_fonte: 15.0,
-            tamanho_menu: 10.0,
+            tamanho_fonte: 14.0_f32,
+            tamanho_menu: 14.0_f32,
+            pasta_icones: String::from("/usr/local/share/icons/GartoonRedux/24x24/actions"),
+            decoracoes_sistema: true,
             quebra_linha: true,
             numeros_linha: true,
             barra_estado: true,
@@ -264,8 +352,8 @@ impl Config {
                     "modo_tema" => {
                         cfg.modo_tema = match v {
                             "Claro" => ModoTema::Claro,
-                            "Classico" => ModoTema::Classico,
-                            _ => ModoTema::Escuro,
+                            "Escuro" => ModoTema::Escuro,
+                            _ => ModoTema::Sistema,
                         };
                     }
                     "idioma" => cfg.idioma = Idioma::de_codigo(v),
@@ -277,17 +365,23 @@ impl Config {
                     "tamanho_fonte" => {
                         if let Ok(n) = v.parse::<f32>() {
                             if n.is_finite() {
-                                cfg.tamanho_fonte = n.clamp(9.0, 32.0);
+                                cfg.tamanho_fonte = n.clamp(9.0_f32, 32.0_f32);
                             }
                         }
                     }
                     "tamanho_menu" => {
                         if let Ok(n) = v.parse::<f32>() {
                             if n.is_finite() {
-                                cfg.tamanho_menu = n.clamp(10.0, 26.0);
+                                cfg.tamanho_menu = n.clamp(10.0_f32, 26.0_f32);
                             }
                         }
                     }
+                    "pasta_icones" => {
+                        if !v.is_empty() {
+                            cfg.pasta_icones = v.to_owned();
+                        }
+                    }
+                    "decoracoes_sistema" => cfg.decoracoes_sistema = v == "true",
                     "quebra_linha" => cfg.quebra_linha = v == "true",
                     "numeros_linha" => cfg.numeros_linha = v == "true",
                     "barra_estado" => cfg.barra_estado = v == "true",
@@ -316,18 +410,31 @@ impl Config {
         let modo_str = match self.modo_tema {
             ModoTema::Claro => "Claro",
             ModoTema::Escuro => "Escuro",
-            ModoTema::Classico => "Classico",
+            ModoTema::Sistema => "Sistema",
         };
+        let tam_fonte = if self.tamanho_fonte.is_finite() {
+            self.tamanho_fonte.clamp(9.0_f32, 32.0_f32)
+        } else {
+            14.0_f32
+        };
+        let tam_menu = if self.tamanho_menu.is_finite() {
+            self.tamanho_menu.clamp(10.0_f32, 26.0_f32)
+        } else {
+            16.0_f32
+        };
+        let largura_tab = self.largura_tab.clamp(2, 8);
         let texto = format!(
-            "modo_tema={modo_str}\nidioma={}\nfonte_familia={}\ntamanho_fonte={:.1}\ntamanho_menu={:.1}\nquebra_linha={}\nnumeros_linha={}\nbarra_estado={}\nlargura_tab={}\nusar_espacos_tab={}\nauto_indentar={}\ndestacar_linha_atual={}\nguardar_automatico={}\n",
+            "modo_tema={modo_str}\nidioma={}\nfonte_familia={}\ntamanho_fonte={:.1}\ntamanho_menu={:.1}\npasta_icones={}\ndecoracoes_sistema={}\nquebra_linha={}\nnumeros_linha={}\nbarra_estado={}\nlargura_tab={}\nusar_espacos_tab={}\nauto_indentar={}\ndestacar_linha_atual={}\nguardar_automatico={}\n",
             self.idioma.codigo(),
             self.fonte_familia,
-            self.tamanho_fonte,
-            self.tamanho_menu,
+            tam_fonte,
+            tam_menu,
+            self.pasta_icones,
+            self.decoracoes_sistema,
             self.quebra_linha,
             self.numeros_linha,
             self.barra_estado,
-            self.largura_tab,
+            largura_tab,
             self.usar_espacos_tab,
             self.auto_indentar,
             self.destacar_linha_atual,

@@ -1,8 +1,12 @@
 #![forbid(unsafe_code)]
 
 use eframe::egui;
+use rustpad::ModoTema;
 use std::fs;
 use std::path::PathBuf;
+
+use crate::config::Textos;
+use crate::estilo::{self, cor32};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AcaoFicheiro {
@@ -97,34 +101,68 @@ impl EstadoFicheiro {
         }
     }
 
-    pub fn desenhar_dialogos(&mut self, ctx: &egui::Context, texto: &mut String) {
+    pub fn desenhar_dialogos(
+        &mut self,
+        ctx: &egui::Context,
+        texto: &mut String,
+        modo_tema: ModoTema,
+        t: &Textos,
+    ) {
+        let tema = estilo::resolver_tema(modo_tema);
+
         if let Some(modo) = self.dialogo {
             let titulo = match modo {
-                ModoDialogo::Abrir => "Abrir ficheiro",
-                ModoDialogo::GuardarComo => "Guardar ficheiro como",
+                ModoDialogo::Abrir => t.dialogo_abrir_titulo,
+                ModoDialogo::GuardarComo => t.dialogo_guardar_titulo,
             };
-            let mut aberto = true;
             let mut confirmar = false;
-            let mut cancelar = false;
+            let mut cancelar = ctx.input(|i| i.key_pressed(egui::Key::Escape));
 
             egui::Window::new(titulo)
+                .id(egui::Id::new("dialogo_ficheiro_rustpad"))
+                .title_bar(false)
                 .collapsible(false)
                 .resizable(false)
-                .open(&mut aberto)
+                .fixed_size(egui::vec2(420.0_f32, 0.0_f32))
+                .frame(estilo::frame_dialogo(&tema))
                 .show(ctx, |ui| {
-                    ui.label("Caminho do ficheiro:");
-                    let resp = ui.text_edit_singleline(&mut self.entrada_caminho);
-                    if resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                        confirmar = true;
+                    ui.set_width(420.0_f32);
+                    if estilo::cabecalho_dialogo(ui, estilo::IconeCabecalho::Ficheiro, titulo, &tema) {
+                        cancelar = true;
                     }
-                    ui.horizontal(|ui| {
-                        if ui.button("Confirmar").clicked() {
-                            confirmar = true;
-                        }
-                        if ui.button("Cancelar").clicked() {
-                            cancelar = true;
-                        }
+
+                    estilo::corpo_dialogo().show(ui, |ui| {
+                        ui.spacing_mut().item_spacing = egui::vec2(8.0_f32, 10.0_f32);
+                        estilo::cartao_grupo(&tema).show(ui, |ui| {
+                            ui.set_min_width(368.0_f32);
+                            estilo::titulo_seccao(ui, t.dialogo_caminho, &tema);
+                            let resp = ui.add(
+                                egui::TextEdit::singleline(&mut self.entrada_caminho)
+                                    .desired_width(366.0_f32)
+                                    .hint_text("/home/utilizador/documento.txt"),
+                            );
+                            if resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                                confirmar = true;
+                            }
+                        });
                     });
+
+                    let rodape = estilo::frame_rodape_dialogo(&tema).show(ui, |ui| {
+                        ui.set_min_width(ui.available_width());
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            let pode = !self.entrada_caminho.trim().is_empty();
+                            if ui
+                                .add_enabled(pode, estilo::botao_primario(t.confirmar, &tema))
+                                .clicked()
+                            {
+                                confirmar = true;
+                            }
+                            if ui.button(t.cancelar).clicked() {
+                                cancelar = true;
+                            }
+                        });
+                    });
+                    estilo::linha_separadora_topo(ui, rodape.response.rect, &tema);
                 });
 
             if confirmar && !self.entrada_caminho.trim().is_empty() {
@@ -134,24 +172,53 @@ impl EstadoFicheiro {
                     ModoDialogo::GuardarComo => self.gravar(&path, texto),
                 }
                 self.dialogo = None;
-            } else if cancelar || !aberto {
+            } else if cancelar {
                 self.dialogo = None;
             }
         }
 
         if let Some(ref msg) = self.erro.clone() {
-            let mut aberto = true;
-            egui::Window::new("Erro de ficheiro")
+            let mut fechar_erro = ctx.input(|i| i.key_pressed(egui::Key::Escape));
+            egui::Window::new(t.dialogo_erro_titulo)
+                .id(egui::Id::new("dialogo_erro_rustpad"))
+                .title_bar(false)
                 .collapsible(false)
                 .resizable(false)
-                .open(&mut aberto)
+                .fixed_size(egui::vec2(380.0_f32, 0.0_f32))
+                .frame(estilo::frame_dialogo(&tema))
                 .show(ctx, |ui| {
-                    ui.colored_label(ui.visuals().error_fg_color, msg);
-                    if ui.button("Fechar").clicked() {
-                        self.erro = None;
+                    ui.set_width(380.0_f32);
+                    if estilo::cabecalho_dialogo(
+                        ui,
+                        estilo::IconeCabecalho::Erro,
+                        t.dialogo_erro_titulo,
+                        &tema,
+                    ) {
+                        fechar_erro = true;
                     }
+
+                    estilo::corpo_dialogo().show(ui, |ui| {
+                        estilo::cartao_grupo(&tema).show(ui, |ui| {
+                            ui.set_min_width(328.0_f32);
+                            ui.label(
+                                egui::RichText::new(msg)
+                                    .color(cor32(tema.perigo))
+                                    .strong(),
+                            );
+                        });
+                    });
+
+                    let rodape = estilo::frame_rodape_dialogo(&tema).show(ui, |ui| {
+                        ui.set_min_width(ui.available_width());
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.add(estilo::botao_primario(t.fechar, &tema)).clicked() {
+                                fechar_erro = true;
+                            }
+                        });
+                    });
+                    estilo::linha_separadora_topo(ui, rodape.response.rect, &tema);
                 });
-            if !aberto {
+            if fechar_erro {
                 self.erro = None;
             }
         }

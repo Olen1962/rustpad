@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 
 use eframe::egui;
+use rustpad::ModoTema;
 
 use crate::config::Textos;
+use crate::estilo::{self, cor32};
 
 #[derive(Default)]
 pub struct Procura {
@@ -28,13 +30,20 @@ impl Procura {
         }
     }
 
-    pub fn desenhar(&mut self, ctx: &egui::Context, texto: &mut String, t: &Textos) -> bool {
+    pub fn desenhar(
+        &mut self,
+        ctx: &egui::Context,
+        texto: &mut String,
+        modo_tema: ModoTema,
+        t: &Textos,
+    ) -> bool {
         if !self.aberta {
             return false;
         }
 
+        let tema = estilo::resolver_tema(modo_tema);
         let mut alterou_texto = false;
-        let mut janela_aberta = self.aberta;
+        let mut fechar = ctx.input(|i| i.key_pressed(egui::Key::Escape));
         let total = self.contar_ocorrencias(texto);
         if total == 0 {
             self.indice_atual = 0;
@@ -43,61 +52,119 @@ impl Procura {
         }
 
         egui::Window::new(t.procurar_substituir)
-            .open(&mut janela_aberta)
+            .id(egui::Id::new("janela_procura_rustpad"))
+            .title_bar(false)
             .collapsible(false)
-            .resizable(true)
-            .default_width(360.0)
+            .resizable(false)
+            .fixed_size(egui::vec2(400.0_f32, 0.0_f32))
+            .frame(estilo::frame_dialogo(&tema))
             .show(ctx, |ui| {
-                egui::Grid::new("grid_procura")
-                    .num_columns(2)
-                    .spacing([8.0, 6.0])
-                    .show(ui, |ui| {
-                        ui.label(format!("{}:", t.procurar));
-                        ui.text_edit_singleline(&mut self.termo);
-                        ui.end_row();
+                ui.set_width(400.0_f32);
+                if estilo::cabecalho_dialogo(
+                    ui,
+                    estilo::IconeCabecalho::Procura,
+                    t.procurar_substituir,
+                    &tema,
+                ) {
+                    fechar = true;
+                }
 
-                        ui.label(format!("{}:", t.substituir));
-                        ui.text_edit_singleline(&mut self.substituir_por);
-                        ui.end_row();
+                estilo::corpo_dialogo().show(ui, |ui| {
+                    ui.spacing_mut().item_spacing = egui::vec2(8.0_f32, 10.0_f32);
+
+                    estilo::cartao_grupo(&tema).show(ui, |ui| {
+                        ui.set_min_width(348.0_f32);
+                        egui::Grid::new("grid_procura")
+                            .num_columns(2)
+                            .spacing([10.0_f32, 8.0_f32])
+                            .show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(t.procurar)
+                                        .color(cor32(tema.texto_secundario)),
+                                );
+                                ui.add(
+                                    egui::TextEdit::singleline(&mut self.termo)
+                                        .desired_width(256.0_f32)
+                                        .hint_text(t.dica_procurar),
+                                );
+                                ui.end_row();
+
+                                ui.label(
+                                    egui::RichText::new(t.substituir)
+                                        .color(cor32(tema.texto_secundario)),
+                                );
+                                ui.add(
+                                    egui::TextEdit::singleline(&mut self.substituir_por)
+                                        .desired_width(256.0_f32)
+                                        .hint_text(t.dica_substituir),
+                                );
+                                ui.end_row();
+                            });
                     });
 
-                ui.horizontal(|ui| {
-                    ui.checkbox(&mut self.distinguir_maiusculas, "Aa");
-                    if total > 0 {
-                        ui.label(format!("{}/{} {}", self.indice_atual + 1, total, t.resultados));
-                    } else {
-                        ui.label(format!("0 {}", t.resultados));
-                    }
-                });
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut self.distinguir_maiusculas, t.maiusculas_exatas);
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            let etiqueta = if total > 0 {
+                                format!("{}/{} {}", self.indice_atual + 1, total, t.resultados)
+                            } else {
+                                format!("0 {}", t.resultados)
+                            };
+                            let cor_cont = if total > 0 {
+                                cor32(tema.destaque)
+                            } else {
+                                cor32(tema.texto_secundario)
+                            };
+                            ui.label(egui::RichText::new(etiqueta).small().strong().color(cor_cont));
+                        });
+                    });
 
-                ui.separator();
-
-                ui.horizontal_wrapped(|ui| {
-                    if ui.button(t.anterior).clicked() && total > 0 {
-                        self.indice_atual = if self.indice_atual == 0 {
-                            total - 1
-                        } else {
-                            self.indice_atual - 1
-                        };
-                    }
-                    if ui.button(t.seguinte).clicked() && total > 0 {
-                        self.indice_atual = (self.indice_atual + 1) % total;
-                    }
-                    if ui.button(t.substituir).clicked() && !self.termo.is_empty() && total > 0 {
-                        if let Some(novo) = self.substituir_ocorrencia(texto, self.indice_atual) {
-                            *texto = novo;
-                            alterou_texto = true;
+                    ui.horizontal(|ui| {
+                        if ui
+                            .add_enabled(total > 0, egui::Button::new(format!("◀ {}", t.anterior)))
+                            .clicked()
+                        {
+                            self.indice_atual = if self.indice_atual == 0 {
+                                total - 1
+                            } else {
+                                self.indice_atual - 1
+                            };
                         }
-                    }
-                    if ui.button(t.substituir_tudo).clicked() && !self.termo.is_empty() {
-                        *texto = self.substituir_todas(texto);
-                        self.indice_atual = 0;
-                        alterou_texto = true;
-                    }
+                        if ui
+                            .add_enabled(total > 0, egui::Button::new(format!("{} ▶", t.seguinte)))
+                            .clicked()
+                        {
+                            self.indice_atual = (self.indice_atual + 1) % total;
+                        }
+
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            let pode = !self.termo.is_empty() && total > 0;
+                            if ui
+                                .add_enabled(pode, estilo::botao_primario(t.substituir_tudo, &tema))
+                                .clicked()
+                            {
+                                *texto = self.substituir_todas(texto);
+                                self.indice_atual = 0;
+                                alterou_texto = true;
+                            }
+                            if ui
+                                .add_enabled(pode, egui::Button::new(t.substituir))
+                                .clicked()
+                            {
+                                if let Some(novo) = self.substituir_ocorrencia(texto, self.indice_atual)
+                                {
+                                    *texto = novo;
+                                    alterou_texto = true;
+                                }
+                            }
+                        });
+                    });
                 });
             });
 
-        self.aberta = janela_aberta;
+        if fechar {
+            self.aberta = false;
+        }
         alterou_texto
     }
 

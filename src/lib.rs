@@ -113,14 +113,14 @@ pub fn para_hex_css(cor: Rgb) -> String {
 }
 
 // ============================================================================
-// SISTEMA DE TEMAS SEMÂNTICOS (Compatível com GTK4 / Adwaita & egui)
+// SISTEMA DE TEMAS SEMÂNTICOS (Compatível com GTK4 / XFCE & egui)
 // ============================================================================
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ModoTema {
     Claro,
     Escuro,
-    Classico,
+    Sistema,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -191,26 +191,26 @@ impl Tema {
         raio_janela: 12,
     };
 
-    pub const CLASSICO: Self = Self {
-        modo: ModoTema::Classico,
-        fundo_janela: paleta::CLEARLOOKS_CINZA,
-        fundo_cartao: paleta::FUNDO_CLARO,
+    pub const SISTEMA: Self = Self {
+        modo: ModoTema::Sistema,
+        fundo_janela: (245, 245, 244),
+        fundo_cartao: paleta::CARTAO_CLARO,
         fundo_texto: paleta::BRANCO_PURO,
-        barra_titulo: paleta::RALEIGH_CINZA,
+        barra_titulo: (44, 44, 44),
         popover: paleta::BRANCO_PURO,
-        borda: paleta::CINZENTO_CLARO,
-        separador: paleta::CLARO_4,
+        borda: paleta::BORDA_CLARA,
+        separador: paleta::SEPARADOR_CLARO,
         texto_principal: paleta::TEXTO_ESCURO,
-        texto_secundario: paleta::CINZENTO_MEDIO,
+        texto_secundario: paleta::TEXTO_SECUNDARIO_CLARO,
         texto_desativado: paleta::TEXTO_DESATIVADO_CLARO,
-        destaque: paleta::TANGO_CEU_MEDIO,
-        destaque_hover: paleta::TANGO_CEU_CLARO,
-        destaque_clique: paleta::TANGO_CEU_ESCURO,
+        destaque: paleta::AZUL_GTK,
+        destaque_hover: paleta::AZUL_HOVER,
+        destaque_clique: paleta::AZUL_CLIQUE,
         sucesso: paleta::TANGO_CAMALEAO_ESCURO,
         aviso: paleta::TANGO_LARANJA,
         perigo: paleta::TANGO_ESCARLATE,
-        raio_widget: 3,
-        raio_janela: 4,
+        raio_widget: 4,
+        raio_janela: 6,
     };
 
     #[inline]
@@ -218,7 +218,7 @@ impl Tema {
         match modo {
             ModoTema::Claro => Self::CLARO,
             ModoTema::Escuro => Self::ESCURO,
-            ModoTema::Classico => Self::CLASSICO,
+            ModoTema::Sistema => Self::SISTEMA,
         }
     }
 
@@ -503,7 +503,7 @@ pub mod paleta {
     pub const TEXTO_SECUNDARIO_ESCURO: Rgb = (154, 153, 150); // #9a9996
     pub const TEXTO_DESATIVADO_CLARO: Rgb = (146, 149, 149); // #929595
     pub const TEXTO_DESATIVADO_ESCURO: Rgb = (104, 104, 104); // #686868
-                                                              // --- Temas GTK clássicos (Tango, Clearlooks, Raleigh, Ubuntu) ---
+                                                             // --- Temas GTK clássicos (Tango, Clearlooks, Raleigh, Ubuntu) ---
     pub const TANGO_CEU_CLARO: Rgb = (114, 159, 207); // #729fcf
     pub const TANGO_CEU_MEDIO: Rgb = (52, 101, 164); // #3465a4
     pub const TANGO_CEU_ESCURO: Rgb = (32, 74, 135); // #204a87

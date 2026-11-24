@@ -14,12 +14,12 @@ pub fn aplicar_acao(acao: AcaoVer, config: &mut Config) -> bool {
     match acao {
         AcaoVer::Nenhuma => false,
         AcaoVer::ZoomMais => {
-            config.tamanho_fonte = (config.tamanho_fonte + 1.0).min(32.0);
+            config.tamanho_fonte = (config.tamanho_fonte + 1.0_f32).min(32.0_f32);
             let _ = config.guardar();
             true
         }
         AcaoVer::ZoomMenos => {
-            config.tamanho_fonte = (config.tamanho_fonte - 1.0).max(9.0);
+            config.tamanho_fonte = (config.tamanho_fonte - 1.0_f32).max(9.0_f32);
             let _ = config.guardar();
             true
         }

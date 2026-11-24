@@ -1,9 +1,8 @@
 #![forbid(unsafe_code)]
 
 use eframe::egui;
-use rustpad::Tema;
 
-use crate::barra;
+use crate::barra::{self, IconCache};
 use crate::config::{Config, Textos};
 use crate::editar::{AcaoEditar, Historico};
 use crate::estilo::{self, cor32};
@@ -19,6 +18,7 @@ pub struct Editor {
     historico: Historico,
     procura: Procura,
     preferencias: JanelaPreferencias,
+    icones: IconCache,
 }
 
 impl Editor {
@@ -30,6 +30,7 @@ impl Editor {
             historico: Historico::default(),
             procura: Procura::default(),
             preferencias: JanelaPreferencias::default(),
+            icones: IconCache::default(),
         }
     }
 
@@ -80,11 +81,18 @@ impl eframe::App for Editor {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.processar_atalhos(ctx);
 
+        let tela = ctx.screen_rect();
+        if !tela.is_positive() || tela.width() < 40.0_f32 || tela.height() < 40.0_f32 {
+            egui::CentralPanel::default().show(ctx, |_| {});
+            ctx.request_repaint();
+            return;
+        }
+
         let t = Textos::de(self.config.idioma);
         let titulo = self.ficheiro.titulo_janela(t.sem_nome);
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(titulo.clone()));
 
-        let res = barra::desenhar(ctx, &titulo, &mut self.config);
+        let res = barra::desenhar(ctx, &mut self.icones, &titulo, &mut self.config);
         if res.sair {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
@@ -112,17 +120,17 @@ impl eframe::App for Editor {
             estilo::aplicar_fontes(ctx, &self.config);
         }
 
-        let tema = Tema::obter(self.config.modo_tema);
+        let tema = estilo::resolver_tema(self.config.modo_tema);
 
         if self.config.barra_estado {
             egui::TopBottomPanel::bottom("barra_estado")
                 .frame(egui::Frame {
-                    inner_margin: egui::Margin::symmetric(12.0, 5.0),
+                    inner_margin: egui::Margin::symmetric(12.0_f32, 5.0_f32),
                     outer_margin: egui::Margin::ZERO,
                     rounding: egui::Rounding::ZERO,
                     shadow: egui::epaint::Shadow::NONE,
-                    fill: cor32(tema.barra_titulo),
-                    stroke: egui::Stroke::new(1.0, cor32(tema.separador)),
+                    fill: cor32(tema.fundo_janela),
+                    stroke: egui::Stroke::new(1.0_f32, cor32(tema.separador)),
                 })
                 .show(ctx, |ui| {
                     ui.horizontal(|ui| {
@@ -136,24 +144,29 @@ impl eframe::App for Editor {
                             .small()
                             .color(cor32(tema.texto_secundario)),
                         );
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.label(
-                                egui::RichText::new(format!(
-                                    "{} · {:?}",
-                                    self.config.idioma.nome(),
-                                    tema.modo
-                                ))
-                                .small()
-                                .color(cor32(tema.destaque)),
-                            );
-                        });
+                        if ui.available_width() > 20.0_f32 {
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                ui.label(
+                                    egui::RichText::new(format!(
+                                        "{} · {:?}",
+                                        self.config.idioma.nome(),
+                                        tema.modo
+                                    ))
+                                    .small()
+                                    .color(cor32(tema.destaque)),
+                                );
+                            });
+                        }
                     });
                 });
         }
 
+        let quebra_linha = self.config.quebra_linha;
+        let cor_texto = cor32(tema.texto_principal);
+
         egui::CentralPanel::default()
             .frame(egui::Frame {
-                inner_margin: egui::Margin::same(0.0),
+                inner_margin: egui::Margin::same(0.0_f32),
                 outer_margin: egui::Margin::ZERO,
                 rounding: egui::Rounding::ZERO,
                 shadow: egui::epaint::Shadow::NONE,
@@ -161,15 +174,23 @@ impl eframe::App for Editor {
                 stroke: egui::Stroke::NONE,
             })
             .show(ctx, |ui| {
-                egui::ScrollArea::vertical().show(ui, |ui| {
+                let largura_painel = ui.available_width().max(40.0_f32);
+                let altura_painel = ui.available_height().max(40.0_f32);
+                let scroll = if quebra_linha {
+                    egui::ScrollArea::vertical().auto_shrink([false, false])
+                } else {
+                    egui::ScrollArea::both().auto_shrink([false, false])
+                };
+                scroll.show(ui, |ui| {
                     ui.horizontal_top(|ui| {
+                        let mut largura_editor = largura_painel;
                         if self.config.numeros_linha {
                             let total = self.texto.split('\n').count().max(1);
                             let mut coluna = String::new();
                             for idx in 1..=total {
                                 coluna.push_str(&format!("{idx:>4}\n"));
                             }
-                            ui.add(
+                            let resp_num = ui.add(
                                 egui::Label::new(
                                     egui::RichText::new(coluna)
                                         .monospace()
@@ -177,13 +198,34 @@ impl eframe::App for Editor {
                                 )
                                 .selectable(false),
                             );
+                            largura_editor = (largura_painel
+                                - resp_num.rect.width()
+                                - ui.spacing().item_spacing.x)
+                            .max(40.0_f32);
                         }
 
-                        let resp = ui.add_sized(
-                            ui.available_size(),
+                        let mut layouter = |ui: &egui::Ui, texto_buf: &str, wrap_width: f32| {
+                            let fonte = egui::TextStyle::Monospace.resolve(ui.style());
+                            let limite = if quebra_linha {
+                                wrap_width.max(40.0_f32)
+                            } else {
+                                f32::INFINITY
+                            };
+                            let job = egui::text::LayoutJob::simple(
+                                texto_buf.to_owned(),
+                                fonte,
+                                cor_texto,
+                                limite,
+                            );
+                            ui.ctx().fonts(|f| f.layout_job(job))
+                        };
+
+                        let resp = ui.add(
                             egui::TextEdit::multiline(&mut self.texto)
                                 .font(egui::TextStyle::Monospace)
-                                .desired_width(f32::INFINITY)
+                                .desired_width(largura_editor)
+                                .min_size(egui::vec2(largura_editor, altura_painel))
+                                .layouter(&mut layouter)
                                 .frame(false),
                         );
 
@@ -198,12 +240,18 @@ impl eframe::App for Editor {
                 });
             });
 
-        if self.procura.desenhar(ctx, &mut self.texto, &t) {
+        if self
+            .procura
+            .desenhar(ctx, &mut self.texto, self.config.modo_tema, &t)
+        {
             self.ficheiro.modificado = true;
             self.historico.registar(&self.texto);
         }
 
-        self.ficheiro.desenhar_dialogos(ctx, &mut self.texto);
-        self.preferencias.desenhar(ctx, &mut self.config);
+        self.ficheiro
+            .desenhar_dialogos(ctx, &mut self.texto, self.config.modo_tema, &t);
+        if self.preferencias.desenhar(ctx, &mut self.config) {
+            self.icones.invalidar();
+        }
     }
 }
